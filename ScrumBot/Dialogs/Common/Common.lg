@@ -7,5 +7,5 @@
 > Structured template
 # WelcomeActions
 [Activity
-    SuggestedActions = Standup | Planning | Refinement | Setup | Help
+    SuggestedActions = Standup | Planning | Refinement | setup | Help
 ]
