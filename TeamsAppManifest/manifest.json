@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.5",
+  "version": "1.0.0",
+  "id": "d68f55be-b41c-4c97-a6cf-2f8a0635509d",
+  "packageName": "com.teams.sample.sbot-2",
+  "developer": {
+    "name": "sbot-2",
+    "websiteUrl": "https://www.microsoft.com",
+    "privacyUrl": "https://www.teams.com/privacy",
+    "termsOfUseUrl": "https://www.teams.com/termsofuser"
+  },
+  "icons": {
+    "outline": "icon-outline.png",
+    "color": "icon-color.png"
+  },
+  "name": {
+    "short": "easyscrum",
+    "full": "easyscrum"
+  },
+  "description": {
+    "short": "easyscrum",
+    "full": "easyscrum"
+  },
+  "accentColor": "#FFFFFF",
+  "bots": [
+    {
+      "botId": "d68f55be-b41c-4c97-a6cf-2f8a0635509d",
+      "scopes": [
+        "team"
+      ],
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": []
+}
