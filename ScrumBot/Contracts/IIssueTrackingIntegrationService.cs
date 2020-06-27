@@ -9,8 +9,8 @@ namespace ScrumBot.Contracts
     {
         Task<IEnumerable<UserInfo>> GetUsers();
 
-        Task<IEnumerable<TicketInfo>> GetUserTickets(Guid userId);
+        Task<IEnumerable<TicketInfo>> GetUserTickets(string userId);
 
-        Task<bool> SubmitComment(Guid ticketId, string comment);
+        Task<bool> SubmitComment(string ticketId, string comment);
     }
 }

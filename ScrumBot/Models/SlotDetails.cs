@@ -1,7 +1,7 @@
 ﻿using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 
-namespace ScrumBot.Dialogs.Standup
+namespace ScrumBot.Models
 {
     public class SlotDetails
     {

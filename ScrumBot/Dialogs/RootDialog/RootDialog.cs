@@ -10,6 +10,7 @@ using Microsoft.Bot.Builder.Dialogs.Adaptive.Input;
 using Microsoft.Bot.Builder.Dialogs.Adaptive.Templates;
 using Microsoft.Bot.Builder.LanguageGeneration;
 using Microsoft.Extensions.Configuration;
+using ScrumBot.Contracts;
 using ScrumBot.Dialogs.Standup;
 using ScrumBot.Utils;
 
@@ -20,7 +21,7 @@ namespace ScrumBot.Dialogs.RootDialog
         private static IConfiguration _configuration;
         private static UserState _userState;
 
-        public RootDialog(IConfiguration configuration, UserState userState)
+        public RootDialog(IConfiguration configuration, UserState userState, IIssueTrackingIntegrationService issueTrackingIntegrationService)
             : base(nameof(RootDialog))
         {
             _configuration = configuration;
@@ -52,8 +53,8 @@ namespace ScrumBot.Dialogs.RootDialog
                     {
                         Actions = new List<Dialog>()
                         {
-                            new BeginDialog(nameof(StandupDialog))
-                            //new SendActivity("${NotAvailableFunctionalityMessage()}")
+                            new BeginDialog(nameof(StandupRootDialog)),
+                            new SendActivity("${HelpRootDialog()}")
                         }
                     },
                     new OnIntent("Planning")
@@ -126,8 +127,8 @@ namespace ScrumBot.Dialogs.RootDialog
             // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             AddDialog(rootDialog);
 
-            AddDialog(new StandupDialog(_userState));
-            // AddDialog(new StandupUserDialog());
+            AddDialog(new StandupRootDialog(_userState, issueTrackingIntegrationService));
+            // AddDialog(new StandupUsersProcessingDialog());
             // AddDialog(new StandupMeetingDialog());
 
             // The initial child Dialog to run.

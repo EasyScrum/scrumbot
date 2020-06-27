@@ -3,28 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Newtonsoft.Json.Linq;
+using ScrumBot.Contracts;
 using ScrumBot.Models;
 
 namespace ScrumBot.Dialogs.Standup
 {
-    public class SlotFillingDialog : Dialog
+    public class StandupUsersProcessingDialog : Dialog
     {
         // Custom dialogs might define their own custom state.
         // Similarly to the Waterfall dialog we will have a set of values in the ConversationState. However, rather than persisting
         // an index we will persist the last property we prompted for. This way when we resume this code following a prompt we will
         // have remembered what property we were filling.
-        private const string SlotName = "slot";
-        private const string PersistedValues = "values";
+        private const string UserName = "username";
+        private const string PersistedValues = "uservalues";
 
-        // The list of slots defines the properties to collect and the dialogs to use to collect them.
-        private readonly List<SlotDetails> _slots;
+        private readonly UserState _userState;
+        private readonly IIssueTrackingIntegrationService _issueTrackingIntegrationService;
+        private List<UserInfo> _users;
 
-        public SlotFillingDialog(string dialogId, List<SlotDetails> slots)
-            : base(dialogId)
+        public StandupUsersProcessingDialog(UserState userState,
+            IIssueTrackingIntegrationService issueTrackingIntegrationService)
+            : base(nameof(StandupUsersProcessingDialog))
         {
-            _slots = slots ?? throw new ArgumentNullException(nameof(slots));
+            _userState = userState;
+            _issueTrackingIntegrationService = issueTrackingIntegrationService;
         }
 
         /// <summary>
@@ -40,6 +46,8 @@ namespace ScrumBot.Dialogs.Standup
             {
                 throw new ArgumentNullException(nameof(dialogContext));
             }
+
+            _users ??= (await _issueTrackingIntegrationService.GetUsers())?.ToList();
 
             // Run prompt
             return await RunPromptAsync(dialogContext, cancellationToken);
@@ -84,9 +92,10 @@ namespace ScrumBot.Dialogs.Standup
             }
 
             // Update the state with the result from the child prompt.
-            var slotName = (string)dialogContext.ActiveDialog.State[SlotName];
+            var userName = (string)dialogContext.ActiveDialog.State[UserName];
             var values = GetPersistedValues(dialogContext.ActiveDialog);
-            values[slotName] = result;
+            values[userName] = result;
+
 
             // Run prompt.
             return await RunPromptAsync(dialogContext, cancellationToken);
@@ -116,28 +125,25 @@ namespace ScrumBot.Dialogs.Standup
         /// <param name="dialogContext">A handle on the runtime.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A DialogTurnResult indicating the state of this dialog to the caller.</returns>
-        private Task<DialogTurnResult> RunPromptAsync(DialogContext dialogContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> RunPromptAsync(DialogContext dialogContext, CancellationToken cancellationToken)
         {
             var state = GetPersistedValues(dialogContext.ActiveDialog);
 
             // Run through the list of slots until we find one that hasn't been filled yet.
-            var unfilledSlot = _slots.FirstOrDefault((item) => !state.ContainsKey(item.Name));
+            var unfilledUser = _users.FirstOrDefault((item) => !state.ContainsKey(item.Id));
 
             // If we have an unfilled slot we will try to fill it
-            if (unfilledSlot != null)
+            if (unfilledUser != null)
             {
-                // The name of the slot we will be prompting to fill.
-                dialogContext.ActiveDialog.State[SlotName] = unfilledSlot.Name;
+                dialogContext.ActiveDialog.State[UserName] = unfilledUser.Id;
 
-                // If the slot contains prompt text create the PromptOptions.
-
-                // Run the child dialog
-                return dialogContext.BeginDialogAsync(unfilledSlot.DialogId, unfilledSlot.Options, cancellationToken);
+                var ticketsReviewDialogOptions = new TicketsReviewDialogOptions() {User = unfilledUser};
+                return await dialogContext.BeginDialogAsync(nameof(TicketsReviewDialog), ticketsReviewDialogOptions, cancellationToken);
             }
             else
             {
                 // No more slots to fill so end the dialog.
-                return dialogContext.EndDialogAsync(state);
+                return await dialogContext.EndDialogAsync(state);
             }
         }
     }

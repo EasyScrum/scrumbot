@@ -9,7 +9,9 @@ using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ScrumBot.Bots;
+using ScrumBot.Contracts;
 using ScrumBot.Dialogs.RootDialog;
+using ScrumBot.Services;
 
 namespace ScrumBot
 {
@@ -45,6 +47,8 @@ namespace ScrumBot
             services.AddSingleton<ConversationState>();
             
             services.AddSingleton<RootDialog>();
+
+            services.AddSingleton<IIssueTrackingIntegrationService, JiraIntegrationService>();
             
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, DialogBot<RootDialog>>();
