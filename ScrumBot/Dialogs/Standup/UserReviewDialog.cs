@@ -60,9 +60,8 @@ namespace ScrumBot.Dialogs.Standup
 
             if (options.ReportedTickets == null || options.ReportedTickets.Count == 0)
             {
-                await stepContext.Context.SendActivityAsync(
-                    MessageFactory.Text($"[start new thread here] Hi, {options.User.FirstName}, please let us know your status for today."),
-                    cancellationToken);
+                var msg = GetMessageActivityWithMention(options.User, $"[start new thread here] Hi, {{0}}, please let us know your status for today.");
+                await stepContext.Context.SendActivityAsync(msg, cancellationToken);
             }
 
             return await stepContext.NextAsync();
@@ -97,7 +96,7 @@ namespace ScrumBot.Dialogs.Standup
                 var mention = new Mention
                 {
                     Mentioned = user.TeamsUserInfo,
-                    Text = $"<at>{XmlConvert.EncodeName(user.TeamsUserInfo.Name)}</at>"
+                    Text = $"<at>{XmlConvert.EncodeName(user.TeamsUserInfo.GivenName)}</at>"
                 };
 
                 var replyActivity = MessageFactory.Text(string.Format(textPattern, mention.Text));
