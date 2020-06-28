@@ -10,12 +10,12 @@ using ScrumBot.Models;
 
 namespace ScrumBot.Dialogs.Standup
 {
-    public class TicketStatusDialog : ComponentDialog
+    public class TicketReviewDialog : ComponentDialog
     {
         private List<TicketInfo> _tickets = null;
 
-        public TicketStatusDialog()
-            : base(nameof(TicketStatusDialog))
+        public TicketReviewDialog()
+            : base(nameof(TicketReviewDialog))
         {
             var slots = new List<SlotDetails>
             {

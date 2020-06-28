@@ -10,7 +10,7 @@ using ScrumBot.Models;
 
 namespace ScrumBot.Dialogs.Standup
 {
-    public class TicketsReviewDialog : ComponentDialog
+    public class UserReviewDialog : ComponentDialog
     {
         private const string DoneOption = "done";
         private const string ReportedTicketsKey = "value-ticketsReported";
@@ -19,8 +19,8 @@ namespace ScrumBot.Dialogs.Standup
 
         private readonly IIssueTrackingIntegrationService _issueTrackingIntegrationService;
 
-        public TicketsReviewDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService)
-            : base(nameof(TicketsReviewDialog))
+        public UserReviewDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService)
+            : base(nameof(UserReviewDialog))
         {
             _issueTrackingIntegrationService = issueTrackingIntegrationService;
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
@@ -55,7 +55,12 @@ namespace ScrumBot.Dialogs.Standup
             var tickets = options.Tickets ?? (await _issueTrackingIntegrationService.GetUserTickets(options.User.Id))?.ToList();
             stepContext.Values[TicketInfosKey] = tickets;
 
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"[start new thread here] Hi, {options.User.FirstName}, please let us know your status for today."), cancellationToken);
+            if (options.ReportedTickets == null || options.ReportedTickets.Count == 0)
+            {
+                await stepContext.Context.SendActivityAsync(
+                    MessageFactory.Text($"[start new thread here] Hi, {options.User.FirstName}, please let us know your status for today."),
+                    cancellationToken);
+            }
 
             return await stepContext.NextAsync();
         }
@@ -73,7 +78,7 @@ namespace ScrumBot.Dialogs.Standup
 
             var promptOptions = new PromptOptions
             {
-                Prompt = MessageFactory.Text($"Please choose a ticket to report, or `{DoneOption}` to finish."),
+                Prompt = MessageFactory.Text($"{options.User.FirstName}, please choose a ticket to report, or `{DoneOption}` to finish."),
                 RetryPrompt = MessageFactory.Text("Please choose an option from the list."),
                 Choices = ChoiceFactory.ToChoices(choiceOptions),
             };
@@ -100,7 +105,7 @@ namespace ScrumBot.Dialogs.Standup
                         User = GetOptions(stepContext).User,
                         Ticket = ticket
                     };
-                    return await stepContext.BeginDialogAsync(nameof(TicketStatusDialog), ticketStatusDialogOptions, cancellationToken);
+                    return await stepContext.BeginDialogAsync(nameof(TicketReviewDialog), ticketStatusDialogOptions, cancellationToken);
                 }
                 else
                 {
@@ -135,7 +140,7 @@ namespace ScrumBot.Dialogs.Standup
                 ReportedTickets = reportedTickets,
                 Tickets = tickets
             };
-            return await stepContext.ReplaceDialogAsync(nameof(TicketsReviewDialog), options, cancellationToken);
+            return await stepContext.ReplaceDialogAsync(nameof(UserReviewDialog), options, cancellationToken);
         }
         
         private string GetTicketOption(TicketInfo ticket)

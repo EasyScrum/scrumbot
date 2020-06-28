@@ -8,10 +8,4 @@ namespace ScrumBot.Models
         public List<TicketInfo> Tickets { get; set; }
         public List<string> ReportedTickets { get; set; }
     }
-
-    public class TicketStatusDialogOptions
-    {
-        public UserInfo User { get; set; }
-        public TicketInfo Ticket { get; set; }
-    }
 }
