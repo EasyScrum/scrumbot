@@ -55,7 +55,7 @@ namespace ScrumBot.Dialogs.Standup
 
             stepContext.Values[UserKey] = options.User;
 
-            var tickets = options.Tickets ?? (await _issueTrackingIntegrationService.GetUserTickets(options.User.Id))?.ToList();
+            var tickets = options.Tickets ?? (await _issueTrackingIntegrationService.GetTicketsByUserEmail(options.User.Email))?.ToList();
             stepContext.Values[TicketInfosKey] = tickets;
 
             if (options.ReportedTickets == null || options.ReportedTickets.Count == 0)
