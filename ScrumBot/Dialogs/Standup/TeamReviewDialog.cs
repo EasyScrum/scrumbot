@@ -40,7 +40,7 @@ namespace ScrumBot.Dialogs.Standup
         {
             var options = GetOptions(stepContext);
 
-            var users = options.Users ?? await InitUserList(stepContext, cancellationToken);//(await _issueTrackingIntegrationService.GetUsers())?.ToList();
+            var users = options.Users ?? await InitUserList(stepContext, cancellationToken);
             stepContext.Values[UserInfosKey] = users;
 
             return await stepContext.NextAsync();

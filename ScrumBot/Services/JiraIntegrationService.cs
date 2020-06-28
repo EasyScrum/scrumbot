@@ -25,7 +25,7 @@ namespace ScrumBot.Services
                     Id = "FE2DDBE4-C85B-4AD2-A6ED-957689AECAF0",
                     FirstName = "Mikhail",
                     Lastname = "K",
-                    Email = "mikhail_k@gmail.com"
+                    Email = "mikhail.krutalevich@gmail.com"
                 }
             };
         }

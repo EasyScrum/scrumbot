@@ -1,67 +1,81 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using Newtonsoft.Json.Linq;
-using ScrumBot.Contracts;
 using ScrumBot.Models;
+using ScrumBot.Utils;
 
 namespace ScrumBot.Dialogs.Standup
 {
     public class TicketReviewDialog : ComponentDialog
     {
-        private List<TicketInfo> _tickets = null;
+        private const string DoneStuffKey = "value-donestuff";
+        private const string FutureStuffKey = "value-futuretuff";
 
         public TicketReviewDialog()
             : base(nameof(TicketReviewDialog))
         {
-            var slots = new List<SlotDetails>
+            AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
             {
-                new SlotDetails("doneStuff", "text", "What did you do?"),
-                new SlotDetails("plans", "text", "What are you going to do?"),
+                AskDoneStep,
+                AskPlanStep,
+                ProcessResultStep,
+            }));
+
+            InitialDialogId = nameof(WaterfallDialog);
+        }
+
+        private TicketStatusDialogOptions GetOptions(WaterfallStepContext stepContext)
+        {
+            return stepContext.Options as TicketStatusDialogOptions ?? new TicketStatusDialogOptions();
+        }
+
+        private async Task<DialogTurnResult> AskDoneStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var options = GetOptions(stepContext);
+            var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, please let us know your status for {options.Ticket.Name}. What did you do?");
+            return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = prompt }, cancellationToken);
+        }
+
+        private async Task<DialogTurnResult> AskPlanStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            HandleResult(stepContext, DoneStuffKey);
+
+            var options = GetOptions(stepContext);
+            var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, what are you going to do for {options.Ticket.Name}?");
+            return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = prompt }, cancellationToken);
+        }
+
+        private void HandleResult(WaterfallStepContext stepContext, string storeValueKey)
+        {
+            var result = stepContext.Result as string;
+            if (result != null)
+            {
+                var mentions = stepContext.Context.Activity.GetMentions();
+                if (mentions != null && mentions.Length > 0)
+                {
+                    result = result.Replace(mentions[0].Text, "").Trim();
+                }
+
+                stepContext.Values[storeValueKey] = result;
+            }
+        }
+
+        private async Task<DialogTurnResult> ProcessResultStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            HandleResult(stepContext, FutureStuffKey);
+
+            var options = GetOptions(stepContext);
+
+            var ticketStatus = new TicketStatus()
+            {
+                TicketId = options.Ticket.Id,
+                DoneStuff = stepContext.Values[DoneStuffKey] as string,
+                FutureStuff = stepContext.Values[FutureStuffKey] as string
             };
 
-            var dialog = new WaterfallDialog("standup", new WaterfallStep[] {StartDialogAsync, ProcessResultsAsync });
-
-            AddDialog(dialog);
-            AddDialog(new SlotFillingDialog("workStuff", slots));
-            AddDialog(new TextPrompt("text"));
-
-            InitialDialogId = "standup";
-        }
-
-        private async Task<DialogTurnResult> StartDialogAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            var options = stepContext.Options as TicketStatusDialogOptions;
-            if (options == null)
-            {
-                return await stepContext.EndDialogAsync();
-            }
-
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"{options.User.FirstName}, please let us know your status for {options.Ticket.Name}."), cancellationToken);
-
-            return await stepContext.BeginDialogAsync("workStuff", null, cancellationToken);
-        }
-        
-        private async Task<DialogTurnResult> ProcessResultsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            var options = stepContext.Options as TicketStatusDialogOptions;
-            TicketStatus ticketStatus = null;
-
-            if (stepContext.Result is IDictionary<string, object> result && result.Count > 0)
-            {
-                ticketStatus = new TicketStatus()
-                {
-                    TicketId = options.Ticket.Id,
-                    DoneStuff = result["doneStuff"] as string,
-                    FutureStuff = result["plans"] as string
-                };
-
-                var message = $"Post the following data to Jira for {options.Ticket.Name}: Done: {ticketStatus.DoneStuff}\nGoing to do: {ticketStatus.FutureStuff}";
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
-            }
+            var message = $"Post the following data to Jira for {options.Ticket.Name}: Done: {ticketStatus.DoneStuff}\nGoing to do: {ticketStatus.FutureStuff}";
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
 
             return await stepContext.EndDialogAsync(ticketStatus);
         }

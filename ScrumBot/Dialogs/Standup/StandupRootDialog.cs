@@ -31,6 +31,7 @@ namespace ScrumBot.Dialogs.Standup
             AddDialog(new TicketReviewDialog());
             AddDialog(new UserReviewDialog(_issueTrackingIntegrationService));
             AddDialog(new TeamReviewDialog(_issueTrackingIntegrationService));
+            AddDialog(new TextPrompt(nameof(TextPrompt)));
 
             InitialDialogId = "standup";
         }
