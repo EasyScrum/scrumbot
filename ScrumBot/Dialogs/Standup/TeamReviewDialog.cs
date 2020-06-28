@@ -57,7 +57,8 @@ namespace ScrumBot.Dialogs.Standup
                     Id = x.Id,
                     FirstName = x.GivenName,
                     Lastname = x.Surname,
-                    Email = x.Email
+                    Email = x.Email,
+                    TeamsUserInfo = x
                 }).ToList();
             }
             else
@@ -75,10 +76,10 @@ namespace ScrumBot.Dialogs.Standup
             stepContext.Values[ReportedUsersKey] = reportedUsers;
 
             var users = stepContext.Values[UserInfosKey] as List<UserInfo> ?? new List<UserInfo>();
-            var user = users.FirstOrDefault(x => !reportedUsers.Contains(x.Id));
+            var user = users.FirstOrDefault(x => !reportedUsers.Contains(x.Email));
             if (user != null)
             {
-                reportedUsers.Add(user.Id);
+                reportedUsers.Add(user.Email);
 
                 var ticketsReviewDialogOptions = new TicketsReviewDialogOptions() { User = user };
                 return await stepContext.BeginDialogAsync(nameof(UserReviewDialog), ticketsReviewDialogOptions, cancellationToken);

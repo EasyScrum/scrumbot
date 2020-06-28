@@ -18,7 +18,7 @@ namespace ScrumBot.Services
                     Id = "85B9E0E7-0A52-4843-B0BE-819EC84AFF8E",
                     FirstName = "Anton",
                     Lastname = "F",
-                    Email = "anton_f@gmail.com"
+                    Email = "filisyevav@gmail.com"
                 },
                 new UserInfo()
                 {

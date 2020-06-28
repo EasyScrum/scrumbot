@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Bot.Schema.Teams;
 
 namespace ScrumBot.Models
 {
@@ -8,5 +9,7 @@ namespace ScrumBot.Models
         public string FirstName { get; set; }
         public string Lastname { get; set; }
         public string Email { get; set; }
+
+        public TeamsChannelAccount TeamsUserInfo { get; set; }
     }
 }

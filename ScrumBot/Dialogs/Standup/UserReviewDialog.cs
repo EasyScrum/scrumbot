@@ -7,6 +7,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
+using Microsoft.Bot.Schema.Teams;
 using ScrumBot.Contracts;
 using ScrumBot.Models;
 
@@ -78,9 +79,10 @@ namespace ScrumBot.Dialogs.Standup
             var choiceOptions = tickets.Where(x => !reportedTickets.Contains(x.Id)).Select(GetTicketOption).ToList();
             choiceOptions.Add(DoneOption);
 
+            var prompt = GetMessageActivityWithMention(options.User, $"{{0}}, please choose a ticket to report, or `{DoneOption}` to finish.");
             var promptOptions = new PromptOptions
             {
-                Prompt = MessageFactory.Text($"{options.User.FirstName}, please choose a ticket to report, or `{DoneOption}` to finish."),
+                Prompt = prompt,
                 RetryPrompt = MessageFactory.Text("Please choose an option from the list."),
                 Choices = ChoiceFactory.ToChoices(choiceOptions),
             };
@@ -88,17 +90,26 @@ namespace ScrumBot.Dialogs.Standup
             return await stepContext.PromptAsync(nameof(ChoicePrompt), promptOptions, cancellationToken);
         }
 
-        //private async Task<Activity> GetMessageActivityWithMention()
-        //{
-        //    var mention = new Mention
-        //    {
-        //        Mentioned = turnContext.Activity.From,
-        //        Text = $"<at>{XmlConvert.EncodeName(turnContext.Activity.From.Name)}</at>",
-        //    };
+        private Activity GetMessageActivityWithMention(UserInfo user, string textPattern)
+        {
+            if (Settings.UseTeams)
+            {
+                var mention = new Mention
+                {
+                    Mentioned = user.TeamsUserInfo,
+                    Text = $"<at>{XmlConvert.EncodeName(user.TeamsUserInfo.Name)}</at>"
+                };
 
-        //    var replyActivity = MessageFactory.Text($"Hello {mention.Text}.");
-        //    replyActivity.Entities = new List<Entity> { mention };
-        //}
+                var replyActivity = MessageFactory.Text(string.Format(textPattern, mention.Text));
+                replyActivity.Entities = new List<Entity> { mention };
+
+                return replyActivity;
+            }
+            else
+            {
+                return MessageFactory.Text(string.Format(textPattern, user.FirstName));
+            }
+        }
 
         private async Task<DialogTurnResult> ProcessTicket(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
