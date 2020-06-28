@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
+using Microsoft.Bot.Schema;
 using ScrumBot.Contracts;
 using ScrumBot.Models;
 
@@ -85,6 +87,18 @@ namespace ScrumBot.Dialogs.Standup
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt), promptOptions, cancellationToken);
         }
+
+        //private async Task<Activity> GetMessageActivityWithMention()
+        //{
+        //    var mention = new Mention
+        //    {
+        //        Mentioned = turnContext.Activity.From,
+        //        Text = $"<at>{XmlConvert.EncodeName(turnContext.Activity.From.Name)}</at>",
+        //    };
+
+        //    var replyActivity = MessageFactory.Text($"Hello {mention.Text}.");
+        //    replyActivity.Entities = new List<Entity> { mention };
+        //}
 
         private async Task<DialogTurnResult> ProcessTicket(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {

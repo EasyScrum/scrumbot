@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Teams;
 using ScrumBot.Contracts;
 using ScrumBot.Models;
 
@@ -39,10 +40,31 @@ namespace ScrumBot.Dialogs.Standup
         {
             var options = GetOptions(stepContext);
 
-            var users = options.Users ?? (await _issueTrackingIntegrationService.GetUsers())?.ToList();
+            var users = options.Users ?? await InitUserList(stepContext, cancellationToken);//(await _issueTrackingIntegrationService.GetUsers())?.ToList();
             stepContext.Values[UserInfosKey] = users;
 
             return await stepContext.NextAsync();
+        }
+
+        private async Task<List<UserInfo>> InitUserList(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            if (Settings.UseTeams)
+            {
+                var members = await TeamsInfo.GetMembersAsync(stepContext.Context, cancellationToken);
+
+                return members.Select(x => new UserInfo()
+                {
+                    Id = x.Id,
+                    FirstName = x.GivenName,
+                    Lastname = x.Surname,
+                    Email = x.Email
+                }).ToList();
+            }
+            else
+            {
+                var users = await _issueTrackingIntegrationService.GetUsers();
+                return users.ToList();
+            }
         }
 
         private async Task<DialogTurnResult> SelectionStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
