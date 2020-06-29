@@ -37,6 +37,13 @@ namespace ScrumBot.Dialogs.RootDialog
                             new SendActivity("${WelcomeCard()}")
                         }
                     },
+                    new OnIntent("Root")
+                    {
+                        Actions = new List<Dialog>()
+                        {
+                            new SendActivity("${WelcomeCard()}")
+                        }
+                    },
                     new OnIntent("MainMenu")
                     {
                         Actions = new List<Dialog>()
