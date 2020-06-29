@@ -33,7 +33,7 @@ namespace ScrumBot.Dialogs.Standup
         private async Task<DialogTurnResult> AskDoneStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var options = GetOptions(stepContext);
-            var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, please let us know your status for {options.Ticket.Name}. What did you do?");
+            var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, please let us know your status for {options.Ticket.Name}.\n\nWhat did you do?");
             return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = prompt }, cancellationToken);
         }
 
@@ -74,7 +74,7 @@ namespace ScrumBot.Dialogs.Standup
                 FutureStuff = stepContext.Values[FutureStuffKey] as string
             };
 
-            var message = $"Post the following data to Jira for {options.Ticket.Name}: Done: {ticketStatus.DoneStuff}\nGoing to do: {ticketStatus.FutureStuff}";
+            var message = $"The following update will be posted data to Jira for {options.Ticket.Name}:\n\n- {ticketStatus.DoneStuff}\n\n- {ticketStatus.FutureStuff}";
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(message), cancellationToken);
 
             return await stepContext.EndDialogAsync(ticketStatus);

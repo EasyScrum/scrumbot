@@ -2,30 +2,24 @@
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using Newtonsoft.Json.Linq;
 using ScrumBot.Contracts;
-using ScrumBot.Models;
 
 namespace ScrumBot.Dialogs.Standup
 {
     public class StandupRootDialog : ComponentDialog
     {
-        private readonly IStatePropertyAccessor<JObject> _userStateAccessor;
         private readonly IIssueTrackingIntegrationService _issueTrackingIntegrationService;
 
-        public StandupRootDialog(UserState userState, IIssueTrackingIntegrationService issueTrackingIntegrationService)
+        public StandupRootDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService)
             : base(nameof(StandupRootDialog))
         {
             _issueTrackingIntegrationService = issueTrackingIntegrationService;
-            _userStateAccessor = userState.CreateProperty<JObject>("result");
 
             var dialog = new WaterfallDialog("standup", new WaterfallStep[]
             {
                 StartDialogAsync, 
                 FinishDialogAsync
             });
-
-            //var users = await _issueTrackingIntegrationService.GetUsers();
 
             AddDialog(dialog);
             AddDialog(new TicketReviewDialog());

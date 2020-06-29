@@ -3,17 +3,9 @@
 
 [Common](../Common/Common.lg)
 
-> Structured template with composition
-# HelpRootDialog
-[Activity
-    Text = ${WelcomePrefix()}, I'm Scrum Bot. ${WelcomeSuffix()}
-    ${WelcomeActions()}
-]
-
 # NotAvailableFunctionalityMessage
 [Activity
-    Text = This functionality will be available soon. ${WelcomeSuffix()}
-    ${WelcomeActions()}
+    Text = This functionality will be available soon.
 ]
 
 # WelcomeSuffix
@@ -24,13 +16,6 @@
 - Hi
 - Hello
 
-> Structured template with composition
-# IntroMessage
-[Activity
-    Text = Hi, nice to meet you! I'm Scrum Bot. Here are some things I can help with
-    ${WelcomeActions()}
-]
-
 # Cancel.prompt
 - Are you sure you want to cancel? 
 
@@ -39,3 +24,23 @@
 
 # CancelCancelled
 - No worries!
+
+# WelcomeCard
+[Herocard
+    title = Welcome to Scrum Bot!
+    text = Hi, nice to meet you! I’m Scrum Bot. Here are some things I can help with
+    buttons = Standup | Planning | Refinement | Setup | Help
+]
+
+# MainMenuCard
+[Herocard
+    text = ${WelcomePrefix()}, I'm Scrum Bot. ${WelcomeSuffix()}
+    buttons = Standup | Planning | Refinement | Setup | Help
+]
+
+# HelpCard
+[Herocard
+    title = About
+    text = This is the Scrum Bot wich can help you with scrum meetings and other stuff.
+    buttons = Main menu
+]

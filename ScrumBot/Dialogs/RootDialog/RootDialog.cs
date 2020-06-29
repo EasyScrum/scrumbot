@@ -18,35 +18,30 @@ namespace ScrumBot.Dialogs.RootDialog
 {
     public class RootDialog : ComponentDialog
     {
-        private static IConfiguration _configuration;
-        private static UserState _userState;
-
-        public RootDialog(IConfiguration configuration, UserState userState, IIssueTrackingIntegrationService issueTrackingIntegrationService)
+        public RootDialog(IConfiguration configuration, IIssueTrackingIntegrationService issueTrackingIntegrationService)
             : base(nameof(RootDialog))
         {
-            _configuration = configuration;
-            _userState = userState;
-
             string[] paths = { ".", "Dialogs", "RootDialog", "RootDialog.lg" };
             string fullPath = Path.Combine(paths);
 
-            // Create instance of adaptive dialog. 
             var rootDialog = new AdaptiveDialog(nameof(AdaptiveDialog))
             {
                 Generator = new TemplateEngineLanguageGenerator(Templates.ParseFile(fullPath)),
                 Recognizer = RegexRecognizerHelper.CreateTestRecognizer(),
                 Triggers = new List<OnCondition>()
                 {
-                    // Add a rule to welcome user
                     new OnConversationUpdateActivity()
-                    {
-                        Actions = WelcomeUserSteps()
-                    },
-                    new OnIntent("Greeting")
                     {
                         Actions = new List<Dialog>()
                         {
-                            new SendActivity("${HelpRootDialog()}")
+                            new SendActivity("${WelcomeCard()}")
+                        }
+                    },
+                    new OnIntent("MainMenu")
+                    {
+                        Actions = new List<Dialog>()
+                        {
+                            new SendActivity("${MainMenuCard()}")
                         }
                     },
                     new OnIntent("Standup")
@@ -54,49 +49,49 @@ namespace ScrumBot.Dialogs.RootDialog
                         Actions = new List<Dialog>()
                         {
                             new BeginDialog(nameof(StandupRootDialog)),
-                            new SendActivity("${HelpRootDialog()}")
+                            new SendActivity("${MainMenuCard()}")
                         }
                     },
                     new OnIntent("Planning")
                     {
                         Actions = new List<Dialog>()
                         {
-                            new SendActivity("${NotAvailableFunctionalityMessage()}")
+                            new SendActivity("${NotAvailableFunctionalityMessage()}"),
+                            new SendActivity("${MainMenuCard()}")
                         }
                     },
                     new OnIntent("Grooming")
                     {
                         Actions = new List<Dialog>()
                         {
-                            new SendActivity("${NotAvailableFunctionalityMessage()}")
+                            new SendActivity("${NotAvailableFunctionalityMessage()}"),
+                            new SendActivity("${MainMenuCard()}")
                         }
                     },
                     new OnIntent("Setup")
                     {
                         Actions = new List<Dialog>()
                         {
-                            new SendActivity("${NotAvailableFunctionalityMessage()}")
+                            new SendActivity("${NotAvailableFunctionalityMessage()}"),
+                            new SendActivity("${MainMenuCard()}")
                         }
                     },
                     new OnIntent("Help")
                     {
                         Actions = new List<Dialog>()
                         {
-                            new SendActivity("${HelpRootDialog()}")
+                            new SendActivity("${HelpCard()}")
                         }
                     },
                     new OnIntent("Cancel")
                     {
                         Actions = new List<Dialog>()
                         {
-                            // Ask user for confirmation.
-                            // This input will still use the recognizer and specifically the confirm list entity extraction.
                             new ConfirmInput()
                             {
                                 Prompt = new ActivityTemplate("${Cancel.prompt()}"),
                                 Property = "turn.confirm",
                                 Value = "=@confirmation",
-                                // Allow user to intrrupt this only if we did not get a value for confirmation.
                                 AllowInterruptions = "!@confirmation"
                             },
                             new IfCondition()
@@ -104,18 +99,14 @@ namespace ScrumBot.Dialogs.RootDialog
                                 Condition = "turn.confirm == true",
                                 Actions = new List<Dialog>()
                                 {
-                                    // This is the global cancel in case a child dialog did not explicit handle cancel.
                                     new SendActivity("Cancelling all dialogs.."),
-                                    // SendActivity supports full language generation resolution.
-                                    // See here to learn more about language generation
-                                    // https://aka.ms/language-generation
-                                    new SendActivity("${WelcomeActions()}"),
+                                    new SendActivity("${MainMenuCard()}"),
                                     new CancelAllDialogs(),
                                 },
                                 ElseActions = new List<Dialog>()
                                 {
                                     new SendActivity("${CancelCancelled()}"),
-                                    new SendActivity("${WelcomeActions()}")
+                                    new SendActivity("${MainMenuCard()}")
                                 }
                             }
 
@@ -124,52 +115,10 @@ namespace ScrumBot.Dialogs.RootDialog
                 }
             };
 
-            // Add named dialogs to the DialogSet. These names are saved in the dialog state.
             AddDialog(rootDialog);
+            AddDialog(new StandupRootDialog( issueTrackingIntegrationService));
 
-            AddDialog(new StandupRootDialog(_userState, issueTrackingIntegrationService));
-            // AddDialog(new StandupUsersProcessingDialog());
-            // AddDialog(new StandupMeetingDialog());
-
-            // The initial child Dialog to run.
             InitialDialogId = nameof(AdaptiveDialog);
-        }
-
-        private static List<Dialog> WelcomeUserSteps()
-        {
-            return new List<Dialog>()
-            {
-                new SetProperties()
-                {
-                    Assignments = new List<PropertyAssignment>()
-                    {
-                        new PropertyAssignment()
-                        {
-                            Property = "user.profile.name",
-                            Value = "=coalesce(dialog.userName, @userName, @personName)"
-                        }
-                    }
-                },
-
-                // Iterate through membersAdded list and greet user added to the conversation.
-                new Foreach()
-                {
-                    ItemsProperty = "turn.activity.membersAdded",
-                    Actions = new List<Dialog>()
-                    {
-                        // Note: Some channels send two conversation update events - one for the Bot added to the conversation and another for user.
-                        // Filter cases where the bot itself is the recipient of the message. 
-                        new IfCondition()
-                        {
-                            Condition = "$foreach.value.name != turn.activity.recipient.name",
-                            Actions = new List<Dialog>()
-                            {
-                                new SendActivity("${IntroMessage()}")
-                            }
-                        }
-                    }
-                }
-            };
         }
     }
 }

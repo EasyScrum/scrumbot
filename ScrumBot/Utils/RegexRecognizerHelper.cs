@@ -47,6 +47,11 @@ namespace ScrumBot.Utils
                         Intent = "Grooming",
                         Pattern = "(?i)grooming|refinement"
                     },
+                    new IntentPattern()
+                    {
+                        Intent = "MainMenu",
+                        Pattern = "(?i)menu|main menu|root"
+                    },
                 },
                 Entities = new List<EntityRecognizer>()
                 {

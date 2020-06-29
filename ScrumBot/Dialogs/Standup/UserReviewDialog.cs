@@ -61,7 +61,7 @@ namespace ScrumBot.Dialogs.Standup
 
             if (options.ReportedTickets == null || options.ReportedTickets.Count == 0)
             {
-                var msg = DialogHelper.GetMessageActivityWithMention(options.User, $"[start new thread here] Hi, {{0}}, please let us know your status for today.");
+                var msg = DialogHelper.GetMessageActivityWithMention(options.User, $"Hi, {{0}}, please let us know your status for today.");
                 await stepContext.Context.SendActivityAsync(msg, cancellationToken);
             }
 
@@ -129,7 +129,7 @@ namespace ScrumBot.Dialogs.Standup
             if (ticketStatus != null)
             {
                 await _issueTrackingIntegrationService.SubmitComment(ticketStatus.TicketId,
-                    $"Done: {ticketStatus.DoneStuff}. \nPlans: {ticketStatus.FutureStuff}");
+                    $"Done: {ticketStatus.DoneStuff}.\nPlans: {ticketStatus.FutureStuff}");
             }
 
             return await RepeatDialog(stepContext, cancellationToken, tickets, reportedTickets);
@@ -149,7 +149,7 @@ namespace ScrumBot.Dialogs.Standup
         
         private string GetTicketOption(TicketInfo ticket)
         {
-            return $"{ticket.Name} - {ticket.Title}";
+            return $"[{ticket.Name}](https://easyscrum.atlassian.net/browse/{ticket.Name}) - {ticket.Title}";
         }
     }
 }
