@@ -33,23 +33,23 @@ namespace ScrumBot
             ComponentRegistration.Add(new LanguageGenerationComponentRegistration());
 
             // Create the credential provider to be used with the Bot Framework Adapter.
-            services.AddScoped<ICredentialProvider, ConfigurationCredentialProvider>();
+            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
 
             // Create the Bot Framework Adapter with error handling enabled.
-            services.AddScoped<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
+            services.AddSingleton<IBotFrameworkHttpAdapter, AdapterWithErrorHandler>();
 
             // Create the storage we'll be using for User and Conversation state. (Memory is great for testing purposes.)
-            services.AddScoped<IStorage, MemoryStorage>();
+            services.AddSingleton<IStorage, MemoryStorage>();
 
             // Create the User state. (Used in this bot's Dialog implementation.)
-            services.AddScoped<UserState>();
+            services.AddSingleton<UserState>();
 
             // Create the Conversation state. (Used by the Dialog system itself.)
-            services.AddScoped<ConversationState>();
+            services.AddSingleton<ConversationState>();
             
-            services.AddScoped<RootDialog>();
+            services.AddSingleton<RootDialog>();
 
-            services.AddScoped<IIssueTrackingIntegrationService, JiraCustomIntegrationService>();
+            services.AddSingleton<IIssueTrackingIntegrationService, JiraCustomIntegrationService>();
             
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, DialogBot<RootDialog>>();
