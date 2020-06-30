@@ -658,13 +658,13 @@ namespace ScrumBot.vs
 
         public static void AddJiraService(this IServiceCollection services)
         {
-            services.AddScoped<IJiraService, JiraService>();
             services.AddHttpClient(ClientName, c =>
             {
                 c.BaseAddress = new Uri("https://easyscrum.atlassian.net");
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
                 c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", "dnN1aG92ODdAZ21haWwuY29tOkEySG5VYTE4YXV5SklINHhOR0w5RDYxRQ==");
             });
+            services.AddSingleton<IJiraService, JiraService>();
         }
     }
 }
