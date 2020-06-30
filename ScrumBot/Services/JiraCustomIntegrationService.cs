@@ -39,7 +39,7 @@ namespace ScrumBot.Services
             {
                 AssigneeId = userId,
                 Id = issue.Id,
-                Name = issue.Fields.Summary,
+                Name = issue.Key,
                 Title = issue.Fields.Summary
             })
                 .ToList();
