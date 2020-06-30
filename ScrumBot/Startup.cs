@@ -12,6 +12,7 @@ using ScrumBot.Bots;
 using ScrumBot.Contracts;
 using ScrumBot.Dialogs.RootDialog;
 using ScrumBot.Services;
+using ScrumBot.vs;
 
 namespace ScrumBot
 {
@@ -52,6 +53,8 @@ namespace ScrumBot
             
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, DialogBot<RootDialog>>();
+
+            services.AddJiraService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
