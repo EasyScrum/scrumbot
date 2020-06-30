@@ -97,9 +97,19 @@ namespace ScrumBot.Dialogs.Standup
             var choice = (FoundChoice)stepContext.Result;
             var done = choice.Value == DoneOption;
             var tickets = stepContext.Values[TicketInfosKey] as List<TicketInfo> ?? new List<TicketInfo>();
+            var user = GetOptions(stepContext).User;
 
             if (!done)
             {
+                if (Settings.UseTeams && user.TeamsUserInfo != null)
+                {
+                    if (!string.Equals(user.TeamsUserInfo.Id, stepContext.Context.Activity.From.Id, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Waiting response from {user.TeamsUserInfo.GivenName}"), cancellationToken);
+                        return await RepeatDialog(stepContext, cancellationToken, tickets, reportedTickets);
+                    }
+                }
+
                 var ticket = tickets.FirstOrDefault(x => GetTicketOption(x) == choice.Value);
                 if (ticket != null)
                 {
@@ -107,7 +117,7 @@ namespace ScrumBot.Dialogs.Standup
 
                     var ticketStatusDialogOptions = new TicketStatusDialogOptions()
                     {
-                        User = GetOptions(stepContext).User,
+                        User = user,
                         Ticket = ticket
                     };
                     return await stepContext.BeginDialogAsync(nameof(TicketReviewDialog), ticketStatusDialogOptions, cancellationToken);
