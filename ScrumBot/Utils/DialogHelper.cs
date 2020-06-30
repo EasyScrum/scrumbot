@@ -36,5 +36,17 @@ namespace ScrumBot.Utils
         {
             return user.TeamsUserInfo?.GivenName ?? user.FirstName;
         }
+
+        public static bool IsExpectedUser(UserInfo user, ChannelAccount fromUser)
+        {
+            if (Settings.UseTeams && user.TeamsUserInfo != null)
+            {
+                return string.Equals(user.TeamsUserInfo.Id, fromUser.Id, StringComparison.InvariantCultureIgnoreCase);
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 }

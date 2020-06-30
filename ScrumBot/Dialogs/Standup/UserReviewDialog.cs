@@ -101,15 +101,12 @@ namespace ScrumBot.Dialogs.Standup
 
             if (!done)
             {
-                if (Settings.UseTeams && user.TeamsUserInfo != null)
+                if (!DialogHelper.IsExpectedUser(user, stepContext.Context.Activity.From))
                 {
-                    if (!string.Equals(user.TeamsUserInfo.Id, stepContext.Context.Activity.From.Id, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Waiting response from {user.TeamsUserInfo.GivenName}"), cancellationToken);
-                        return await RepeatDialog(stepContext, cancellationToken, tickets, reportedTickets);
-                    }
+                    await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Waiting response from {DialogHelper.GetUserFullName(user)}"), cancellationToken);
+                    return await RepeatDialog(stepContext, cancellationToken, tickets, reportedTickets);
                 }
-
+                
                 var ticket = tickets.FirstOrDefault(x => GetTicketOption(x) == choice.Value);
                 if (ticket != null)
                 {

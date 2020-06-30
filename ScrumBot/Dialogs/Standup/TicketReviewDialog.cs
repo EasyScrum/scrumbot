@@ -39,9 +39,16 @@ namespace ScrumBot.Dialogs.Standup
 
         private async Task<DialogTurnResult> AskPlanStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
+            var options = GetOptions(stepContext);
+
+            if (!DialogHelper.IsExpectedUser(options.User, stepContext.Context.Activity.From))
+            {
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Waiting response from {DialogHelper.GetUserFullName(options.User)}"), cancellationToken);
+                return await stepContext.ReplaceDialogAsync(nameof(TicketReviewDialog), options, cancellationToken);
+            }
+
             HandleResult(stepContext, DoneStuffKey);
 
-            var options = GetOptions(stepContext);
             var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, what are you going to do for {options.Ticket.Name}?");
             return await stepContext.PromptAsync(nameof(TextPrompt), new PromptOptions { Prompt = prompt }, cancellationToken);
         }
@@ -63,9 +70,15 @@ namespace ScrumBot.Dialogs.Standup
 
         private async Task<DialogTurnResult> ProcessResultStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            HandleResult(stepContext, FutureStuffKey);
-
             var options = GetOptions(stepContext);
+
+            if (!DialogHelper.IsExpectedUser(options.User, stepContext.Context.Activity.From))
+            {
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Waiting response from {DialogHelper.GetUserFullName(options.User)}"), cancellationToken);
+                return await stepContext.ReplaceDialogAsync(nameof(TicketReviewDialog), options, cancellationToken);
+            }
+
+            HandleResult(stepContext, FutureStuffKey);
 
             var ticketStatus = new TicketStatus()
             {
