@@ -369,7 +369,7 @@ namespace ScrumBot.vs
         public Watches Watches { get; set; }
 
         [DataMember(Name = "lastViewed")]
-        public DateTime LastViewed { get; set; }
+        public DateTime? LastViewed { get; set; }
 
         [DataMember(Name = "created")]
         public DateTime Created { get; set; }
@@ -662,11 +662,9 @@ namespace ScrumBot.vs
             {
                 c.BaseAddress = new Uri("https://easyscrum.atlassian.net");
                 c.DefaultRequestHeaders.Add("Accept", "application/json");
-                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", "dnN1aG92ODdAZ21haWwuY29tOkEySG5VYTE4YXV5SklINHhOR0w5RDYxRQ==");
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", "a3J1dG9sZXZpY2gtbUB5YW5kZXgucnU6blRmT1Zya0EyOXNFSkNxeVRpZEdFNzJE");
             });
             services.AddSingleton<IJiraService, JiraService>();
         }
     }
 }
-
-//fdsf
