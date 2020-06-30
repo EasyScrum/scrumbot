@@ -55,7 +55,7 @@ namespace ScrumBot.Utils
                     new IntentPattern()
                     {
                         Intent = "Root",
-                        Pattern = "(?i)hi|hello|start"
+                        Pattern = "(?i)hello|start"
                     },
                 },
                 Entities = new List<EntityRecognizer>()

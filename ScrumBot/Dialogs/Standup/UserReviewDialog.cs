@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -128,8 +129,10 @@ namespace ScrumBot.Dialogs.Standup
 
             if (ticketStatus != null)
             {
-                await _issueTrackingIntegrationService.SubmitComment(ticketStatus.TicketId,
-                    $"Done: {ticketStatus.DoneStuff}.\nPlans: {ticketStatus.FutureStuff}");
+                var options = GetOptions(stepContext);
+
+                var comment = GetCommentText(options.User, ticketStatus);
+                await _issueTrackingIntegrationService.SubmitComment(ticketStatus.TicketId, comment);
             }
 
             return await RepeatDialog(stepContext, cancellationToken, tickets, reportedTickets);
@@ -150,6 +153,12 @@ namespace ScrumBot.Dialogs.Standup
         private string GetTicketOption(TicketInfo ticket)
         {
             return $"[{ticket.Name}](https://easyscrum.atlassian.net/browse/{ticket.Name}) - {ticket.Title}";
+        }
+
+        private string GetCommentText(UserInfo user, TicketStatus ticketStatus)
+        {
+            return $"{DialogHelper.GetUserFullName(user)}'s status on {DateTime.Now.ToShortDateString()}:" +
+                   $"\nDone: {ticketStatus.DoneStuff}\nPlans: {ticketStatus.FutureStuff}";
         }
     }
 }

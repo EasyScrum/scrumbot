@@ -31,5 +31,10 @@ namespace ScrumBot.Utils
                 return MessageFactory.Text(string.Format(textPattern, user.FirstName));
             }
         }
+
+        public static string GetUserFullName(UserInfo user)
+        {
+            return user.TeamsUserInfo?.GivenName ?? user.FirstName;
+        }
     }
 }
