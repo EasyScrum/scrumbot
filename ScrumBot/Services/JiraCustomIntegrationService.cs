@@ -38,7 +38,7 @@ namespace ScrumBot.Services
             return issues.Issues.Select(issue => new Models.TicketInfo()
             {
                 AssigneeId = userId,
-                Id = issue.Id,
+                Id = issue.Key,
                 Name = issue.Key,
                 Title = issue.Fields.Summary
             })
