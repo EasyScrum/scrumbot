@@ -27,7 +27,7 @@ namespace ScrumBot.Dialogs.RootDialog
             var rootDialog = new AdaptiveDialog(nameof(AdaptiveDialog))
             {
                 Generator = new TemplateEngineLanguageGenerator(Templates.ParseFile(fullPath)),
-                Recognizer = RegexRecognizerHelper.CreateTestRecognizer(),
+                Recognizer = RecognizerFactory.CreateRecognizer(configuration),
                 Triggers = new List<OnCondition>()
                 {
                     new OnConversationUpdateActivity()
@@ -85,6 +85,7 @@ namespace ScrumBot.Dialogs.RootDialog
                     },
                     new OnIntent("Help")
                     {
+                        Condition = "#Help.Score >= 0.8",
                         Actions = new List<Dialog>()
                         {
                             new SendActivity("${HelpCard()}")
@@ -92,6 +93,7 @@ namespace ScrumBot.Dialogs.RootDialog
                     },
                     new OnIntent("Cancel")
                     {
+                        Condition = "#Cancel.Score >= 0.8",
                         Actions = new List<Dialog>()
                         {
                             new ConfirmInput()

@@ -1,12 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Adaptive.Recognizers;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Bot.Builder.AI.Luis;
 
 namespace ScrumBot.Utils
 {
-    public static class RegexRecognizerHelper
+    public static class RecognizerFactory
     {
-        public static Recognizer CreateTestRecognizer()
+        public static Recognizer CreateRecognizer(IConfiguration configuration)
+        {
+            //return CreateLuisRecognizer(configuration);
+            return CreateRegexRecognizer();
+        }
+
+        public static Recognizer CreateLuisRecognizer(IConfiguration configuration)
+        {
+            if (string.IsNullOrEmpty(configuration["LuisAppId"]) || string.IsNullOrEmpty(configuration["LuisAPIKey"]) || string.IsNullOrEmpty(configuration["LuisAPIHostName"]))
+            {
+                throw new Exception("NOTE: LUIS is not configured. To enable all capabilities, add 'LuisAppId', 'LuisAPIKey' and 'LuisAPIHostName' to the appsettings.json file.");
+            }
+
+            return new LuisAdaptiveRecognizer()
+            {
+                ApplicationId = configuration["LuisAppId"],
+                EndpointKey = configuration["LuisAPIKey"],
+                Endpoint = configuration["LuisAPIHostName"]
+            };
+        }
+
+        public static Recognizer CreateRegexRecognizer()
         {
             return new RegexRecognizer()
             {

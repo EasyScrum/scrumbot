@@ -4,7 +4,7 @@ namespace ScrumBot.Models
 {
     public class UsersReviewDialogOptions
     {
-        public List<UserInfo> Users { get; set; }
+        public List<UserDetails> Users { get; set; }
         public List<string> ReportedUsers { get; set; }
     }
 }

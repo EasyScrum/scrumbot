@@ -7,7 +7,7 @@ namespace ScrumBot.Contracts
 {
     public interface IIssueTrackingIntegrationService
     {
-        Task<IEnumerable<UserInfo>> GetUsers();
+        Task<IEnumerable<UserDetails>> GetUsers();
 
         Task<IEnumerable<TicketInfo>> GetUserTickets(string userId);
         Task<IEnumerable<TicketInfo>> GetTicketsByUserEmail(string userEmail);

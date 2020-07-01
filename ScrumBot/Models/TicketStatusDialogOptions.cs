@@ -2,7 +2,7 @@
 {
     public class TicketStatusDialogOptions
     {
-        public UserInfo User { get; set; }
+        public UserDetails User { get; set; }
         public TicketInfo Ticket { get; set; }
     }
 }

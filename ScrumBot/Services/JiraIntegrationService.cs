@@ -7,32 +7,41 @@ using ScrumBot.Models;
 
 namespace ScrumBot.Services
 {
-    public class JiraIntegrationService: IIssueTrackingIntegrationService
+    public class JiraIntegrationService : IIssueTrackingIntegrationService
     {
-        public async Task<IEnumerable<UserInfo>> GetUsers()
+        private readonly IJiraService jiraService;
+
+        public JiraIntegrationService(IJiraService jiraService)
         {
-            return new List<UserInfo>()
+            this.jiraService = jiraService;
+        }
+
+        public async Task<IEnumerable<UserDetails>> GetUsers()
+        {
+            var users = await this.jiraService.GetUsersAsync("EAS").ConfigureAwait(false);
+
+            return users.Select(user => new UserDetails()
             {
-                new UserInfo()
-                {
-                    Id = "85B9E0E7-0A52-4843-B0BE-819EC84AFF8E",
-                    FirstName = "Anton",
-                    Lastname = "F",
-                    Email = "filisyevav@gmail.com"
-                },
-                new UserInfo()
-                {
-                    Id = "FE2DDBE4-C85B-4AD2-A6ED-957689AECAF0",
-                    FirstName = "Mikhail",
-                    Lastname = "K",
-                    Email = "mikhail.krutalevich@gmail.com"
-                }
-            };
+                Email = user.EmailAddress,
+                FirstName = user.DisplayName,
+                Lastname = user.DisplayName,
+                Id = user.AccountId
+            })
+                .ToList();
         }
 
         public async Task<IEnumerable<TicketInfo>> GetUserTickets(string userId)
         {
-            return GetTickets().Where(x => x.AssigneeId == userId).ToList();
+            var issues = await this.jiraService.GetIssuesAsync(userId).ConfigureAwait(false);
+
+            return issues.Issues.Select(issue => new Models.TicketInfo()
+            {
+                AssigneeId = userId,
+                Id = issue.Key,
+                Name = issue.Key,
+                Title = issue.Fields.Summary
+            })
+                .ToList();
         }
 
         public async Task<IEnumerable<TicketInfo>> GetTicketsByUserEmail(string userEmail)
@@ -45,44 +54,32 @@ namespace ScrumBot.Services
             return await GetUserTickets(user.Id);
         }
 
-        private List<TicketInfo> GetTickets()
-        {
-            return new List<TicketInfo>()
-            {
-                new TicketInfo()
-                {
-                    Id = "B6B34D6E-1921-40EA-BA38-A714578E512D",
-                    Name = "EAS-2",
-                    Title = "Test ticket title for eas-2",
-                    AssigneeId = "85B9E0E7-0A52-4843-B0BE-819EC84AFF8E"
-                },
-                new TicketInfo()
-                {
-                    Id = "588E32DB-250E-41BB-98CD-44007F691318",
-                    Name = "EAS-5",
-                    Title = "Test ticket title for eas-5",
-                    AssigneeId = "85B9E0E7-0A52-4843-B0BE-819EC84AFF8E"
-                },
-                new TicketInfo()
-                {
-                    Id = "46ED5378-F74D-4EFE-9C06-C61A4687ED3B",
-                    Name = "EAS-1",
-                    Title = "Test ticket title for eas-1",
-                    AssigneeId = "FE2DDBE4-C85B-4AD2-A6ED-957689AECAF0"
-                },
-                new TicketInfo()
-                {
-                    Id = "C47EA4B0-B203-4EE7-997A-9363BC3CA41D",
-                    Name = "EAS-3",
-                    Title = "Test ticket title for esm-3",
-                    AssigneeId = "FE2DDBE4-C85B-4AD2-A6ED-957689AECAF0"
-                }
-            };
-        }
-
         public async Task<bool> SubmitComment(string ticketId, string comment)
         {
-            return true;
+            var userComment = new UserComment
+            {
+                Body = new Body()
+                {
+                    Version = 1,
+                    Type = "doc",
+                    Content = new List<Content>()
+                    {
+                        new Content()
+                        {
+                            ContentItems = new List<ContentItem>()
+                                {
+                                    new ContentItem()
+                                    {
+                                        Text = comment, Type = "text"
+                                    }
+                                },
+                            Type = "paragraph"
+                        }
+                    }
+                }
+            };
+
+            return await this.jiraService.TryAddCommentAsync(ticketId, userComment).ConfigureAwait(false);
         }
     }
 }

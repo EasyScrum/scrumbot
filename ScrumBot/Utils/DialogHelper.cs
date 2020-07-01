@@ -11,7 +11,7 @@ namespace ScrumBot.Utils
 {
     public static class DialogHelper
     {
-        public static Activity GetMessageActivityWithMention(UserInfo user, string textPattern)
+        public static Activity GetMessageActivityWithMention(UserDetails user, string textPattern)
         {
             if (Settings.UseTeams)
             {
@@ -32,12 +32,12 @@ namespace ScrumBot.Utils
             }
         }
 
-        public static string GetUserFullName(UserInfo user)
+        public static string GetUserFullName(UserDetails user)
         {
             return user.TeamsUserInfo?.GivenName ?? user.FirstName;
         }
 
-        public static bool IsExpectedUser(UserInfo user, ChannelAccount fromUser)
+        public static bool IsExpectedUser(UserDetails user, ChannelAccount fromUser)
         {
             if (Settings.UseTeams && user.TeamsUserInfo != null)
             {

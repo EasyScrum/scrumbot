@@ -46,13 +46,13 @@ namespace ScrumBot.Dialogs.Standup
             return await stepContext.NextAsync();
         }
 
-        private async Task<List<UserInfo>> InitUserList(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<List<UserDetails>> InitUserList(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             if (Settings.UseTeams)
             {
                 var members = await TeamsInfo.GetMembersAsync(stepContext.Context, cancellationToken);
 
-                return members.Select(x => new UserInfo()
+                return members.Select(x => new UserDetails()
                 {
                     Id = x.Id,
                     FirstName = x.GivenName,
@@ -75,7 +75,7 @@ namespace ScrumBot.Dialogs.Standup
             var reportedUsers = options.ReportedUsers ?? new List<string>();
             stepContext.Values[ReportedUsersKey] = reportedUsers;
 
-            var users = stepContext.Values[UserInfosKey] as List<UserInfo> ?? new List<UserInfo>();
+            var users = stepContext.Values[UserInfosKey] as List<UserDetails> ?? new List<UserDetails>();
             var user = users.FirstOrDefault(x => !reportedUsers.Contains(x.Email));
             if (user != null)
             {
@@ -93,7 +93,7 @@ namespace ScrumBot.Dialogs.Standup
         private async Task<DialogTurnResult> LoopStep(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var reportedUsers = stepContext.Values[ReportedUsersKey] as List<string> ?? new List<string>();
-            var users = stepContext.Values[UserInfosKey] as List<UserInfo> ?? new List<UserInfo>();
+            var users = stepContext.Values[UserInfosKey] as List<UserDetails> ?? new List<UserDetails>();
             var options = new UsersReviewDialogOptions
             {
                 Users = users,

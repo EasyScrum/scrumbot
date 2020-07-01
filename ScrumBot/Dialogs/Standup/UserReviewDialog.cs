@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
-using Microsoft.Bot.Schema;
-using Microsoft.Bot.Schema.Teams;
 using ScrumBot.Contracts;
 using ScrumBot.Models;
 using ScrumBot.Utils;
@@ -150,7 +147,7 @@ namespace ScrumBot.Dialogs.Standup
         {
             var options = new TicketsReviewDialogOptions
             {
-                User = stepContext.Values[UserKey] as UserInfo,
+                User = stepContext.Values[UserKey] as UserDetails,
                 ReportedTickets = reportedTickets,
                 Tickets = tickets
             };
@@ -162,7 +159,7 @@ namespace ScrumBot.Dialogs.Standup
             return $"[{ticket.Name}](https://easyscrum.atlassian.net/browse/{ticket.Name}) - {ticket.Title}";
         }
 
-        private string GetCommentText(UserInfo user, TicketStatus ticketStatus)
+        private string GetCommentText(UserDetails user, TicketStatus ticketStatus)
         {
             return $"{DialogHelper.GetUserFullName(user)}'s status on {DateTime.Now.ToShortDateString()}:" +
                    $"\nDone: {ticketStatus.DoneStuff}\nPlans: {ticketStatus.FutureStuff}";

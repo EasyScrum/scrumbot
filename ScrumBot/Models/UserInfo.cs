@@ -3,7 +3,7 @@ using Microsoft.Bot.Schema.Teams;
 
 namespace ScrumBot.Models
 {
-    public class UserInfo
+    public class UserDetails
     {
         public string Id { get; set; }
         public string FirstName { get; set; }
