@@ -30,9 +30,9 @@ namespace ScrumBot.Services
                 .ToList();
         }
 
-        public async Task<IEnumerable<TicketInfo>> GetUserTickets(string userId)
+        public async Task<IEnumerable<TicketInfo>> GetUserActiveTickets(string userId)
         {
-            var issues = await this.jiraService.GetIssuesAsync(userId).ConfigureAwait(false);
+            var issues = await this.jiraService.GetIssuesAsync(userId, "In Progress").ConfigureAwait(false);
 
             return issues.Issues.Select(issue => new Models.TicketInfo()
             {
@@ -51,7 +51,7 @@ namespace ScrumBot.Services
 
             if (user == null) return new List<TicketInfo>();
 
-            return await GetUserTickets(user.Id);
+            return await GetUserActiveTickets(user.Id);
         }
 
         public async Task<bool> SubmitComment(string ticketId, string comment)

@@ -45,11 +45,11 @@ namespace ScrumBot.Services
             return result;
         }
 
-        public async Task<UserIssues> GetIssuesAsync(string assigneeId)
+        public async Task<UserIssues> GetIssuesAsync(string assigneeId, string status)
         {
             var client = httpClientFactory.CreateClient(Startup.JiraClientName);
             var usersData = await client.GetAsync(
-                new Uri($"/rest/api/3/search?jql=assignee={assigneeId}", UriKind.Relative))
+                new Uri($"/rest/api/3/search?jql=assignee={assigneeId} and status in (\"{status}\")", UriKind.Relative))
                 .ConfigureAwait(false);
             UserIssues result = new UserIssues();
 
