@@ -41,6 +41,7 @@
 # HelpCard
 [Herocard
     title = About
+    subtitle = EasyScrum bot v1.01
     text = This is the Scrum Bot wich can help you with scrum meetings and other stuff.
     buttons = Main menu
 ]
