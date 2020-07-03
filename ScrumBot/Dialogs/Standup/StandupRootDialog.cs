@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using ScrumBot.Contracts;
+using ScrumBot.Services;
 
 namespace ScrumBot.Dialogs.Standup
 {
@@ -10,7 +11,7 @@ namespace ScrumBot.Dialogs.Standup
     {
         private readonly IIssueTrackingIntegrationService _issueTrackingIntegrationService;
 
-        public StandupRootDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService)
+        public StandupRootDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService, SettingProvider settingProvider)
             : base(nameof(StandupRootDialog))
         {
             _issueTrackingIntegrationService = issueTrackingIntegrationService;
@@ -22,9 +23,9 @@ namespace ScrumBot.Dialogs.Standup
             });
 
             AddDialog(dialog);
-            AddDialog(new TicketReviewDialog());
-            AddDialog(new UserReviewDialog(_issueTrackingIntegrationService));
-            AddDialog(new TeamReviewDialog(_issueTrackingIntegrationService));
+            AddDialog(new TicketReviewDialog(settingProvider));
+            AddDialog(new UserReviewDialog(_issueTrackingIntegrationService, settingProvider));
+            AddDialog(new TeamReviewDialog(_issueTrackingIntegrationService, settingProvider));
             AddDialog(new TextPrompt(nameof(TextPrompt)));
 
             InitialDialogId = "standup";

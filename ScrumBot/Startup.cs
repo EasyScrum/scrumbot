@@ -41,6 +41,8 @@ namespace ScrumBot
 
             services.AddSingleton<ConversationState>();
             
+            services.AddSingleton<SettingProvider>();
+
             services.AddSingleton<RootDialog>();
 
             services.AddSingleton<IIssueTrackingIntegrationService, JiraIntegrationService>();

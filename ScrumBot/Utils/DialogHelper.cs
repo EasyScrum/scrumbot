@@ -11,9 +11,9 @@ namespace ScrumBot.Utils
 {
     public static class DialogHelper
     {
-        public static Activity GetMessageActivityWithMention(UserDetails user, string textPattern)
+        public static Activity GetMessageActivityWithMention(UserDetails user, string textPattern, bool useTeams)
         {
-            if (Settings.UseTeams)
+            if (useTeams)
             {
                 var mention = new Mention
                 {
@@ -37,9 +37,9 @@ namespace ScrumBot.Utils
             return user.TeamsUserInfo?.GivenName ?? user.FirstName;
         }
 
-        public static bool IsExpectedUser(UserDetails user, ChannelAccount fromUser)
+        public static bool IsExpectedUser(UserDetails user, ChannelAccount fromUser, bool useTeams)
         {
-            if (Settings.UseTeams && user.TeamsUserInfo != null)
+            if (useTeams && user.TeamsUserInfo != null)
             {
                 return string.Equals(user.TeamsUserInfo.Id, fromUser.Id, StringComparison.InvariantCultureIgnoreCase);
             }

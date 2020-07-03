@@ -12,13 +12,14 @@ using Microsoft.Bot.Builder.LanguageGeneration;
 using Microsoft.Extensions.Configuration;
 using ScrumBot.Contracts;
 using ScrumBot.Dialogs.Standup;
+using ScrumBot.Services;
 using ScrumBot.Utils;
 
 namespace ScrumBot.Dialogs.RootDialog
 {
     public class RootDialog : ComponentDialog
     {
-        public RootDialog(IConfiguration configuration, IIssueTrackingIntegrationService issueTrackingIntegrationService)
+        public RootDialog(IConfiguration configuration, SettingProvider settingProvider, IIssueTrackingIntegrationService issueTrackingIntegrationService)
             : base(nameof(RootDialog))
         {
             string[] paths = { ".", "Dialogs", "RootDialog", "RootDialog.lg" };
@@ -125,7 +126,7 @@ namespace ScrumBot.Dialogs.RootDialog
             };
 
             AddDialog(rootDialog);
-            AddDialog(new StandupRootDialog( issueTrackingIntegrationService));
+            AddDialog(new StandupRootDialog(issueTrackingIntegrationService, settingProvider));
 
             InitialDialogId = nameof(AdaptiveDialog);
         }

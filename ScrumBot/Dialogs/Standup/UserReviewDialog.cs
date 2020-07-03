@@ -8,6 +8,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using ScrumBot.Contracts;
 using ScrumBot.Models;
+using ScrumBot.Services;
 using ScrumBot.Utils;
 
 namespace ScrumBot.Dialogs.Standup
@@ -20,11 +21,13 @@ namespace ScrumBot.Dialogs.Standup
         private const string TicketInfosKey = "value-ticketInfos";
 
         private readonly IIssueTrackingIntegrationService _issueTrackingIntegrationService;
+        private readonly SettingProvider _settingProvider;
 
-        public UserReviewDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService)
+        public UserReviewDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService, SettingProvider settingProvider)
             : base(nameof(UserReviewDialog))
         {
             _issueTrackingIntegrationService = issueTrackingIntegrationService;
+            _settingProvider = settingProvider;
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
 
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
@@ -59,7 +62,7 @@ namespace ScrumBot.Dialogs.Standup
 
             if (options.ReportedTickets == null || options.ReportedTickets.Count == 0)
             {
-                var msg = DialogHelper.GetMessageActivityWithMention(options.User, $"Hi, {{0}}, please let us know your status for today.");
+                var msg = DialogHelper.GetMessageActivityWithMention(options.User, $"Hi, {{0}}, please let us know your status for today.", _settingProvider.UseTeams);
                 await stepContext.Context.SendActivityAsync(msg, cancellationToken);
             }
 
@@ -77,7 +80,7 @@ namespace ScrumBot.Dialogs.Standup
             var choiceOptions = tickets.Where(x => !reportedTickets.Contains(x.Id)).Select(GetTicketOption).ToList();
             choiceOptions.Add(DoneOption);
 
-            var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, please choose a ticket to report, or `{DoneOption}` to finish.");
+            var prompt = DialogHelper.GetMessageActivityWithMention(options.User, $"{{0}}, please choose a ticket to report, or `{DoneOption}` to finish.", _settingProvider.UseTeams);
             var promptOptions = new PromptOptions
             {
                 Prompt = prompt,
@@ -98,7 +101,7 @@ namespace ScrumBot.Dialogs.Standup
 
             if (!done)
             {
-                if (!DialogHelper.IsExpectedUser(user, stepContext.Context.Activity.From))
+                if (!DialogHelper.IsExpectedUser(user, stepContext.Context.Activity.From, _settingProvider.UseTeams))
                 {
                     await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Waiting response from {DialogHelper.GetUserFullName(user)}"), cancellationToken);
                     return await RepeatDialog(stepContext, cancellationToken, tickets, reportedTickets);

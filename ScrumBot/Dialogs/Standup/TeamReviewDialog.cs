@@ -6,6 +6,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Teams;
 using ScrumBot.Contracts;
 using ScrumBot.Models;
+using ScrumBot.Services;
 
 namespace ScrumBot.Dialogs.Standup
 {
@@ -15,11 +16,13 @@ namespace ScrumBot.Dialogs.Standup
         private const string UserInfosKey = "value-userInfos";
 
         private readonly IIssueTrackingIntegrationService _issueTrackingIntegrationService;
+        private readonly SettingProvider _settingProvider;
 
-        public TeamReviewDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService)
+        public TeamReviewDialog(IIssueTrackingIntegrationService issueTrackingIntegrationService, SettingProvider settingProvider)
             : base(nameof(TeamReviewDialog))
         {
             _issueTrackingIntegrationService = issueTrackingIntegrationService;
+            _settingProvider = settingProvider;
 
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
             {
@@ -48,7 +51,7 @@ namespace ScrumBot.Dialogs.Standup
 
         private async Task<List<UserDetails>> InitUserList(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            if (Settings.UseTeams)
+            if (_settingProvider.UseTeams)
             {
                 var members = await TeamsInfo.GetMembersAsync(stepContext.Context, cancellationToken);
 
